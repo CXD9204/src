@@ -35,21 +35,27 @@ def target_url():
         print(e)
 
 
+# 查询普罗米修斯的指标列表
 def prometheus_metric(url):
+    '''
+    http://60.60.60.191:9090/metrics?{instance= "60.60.60.151:9101",job='151linux'} 指定实列的指标
+    :param url:
+    :return:
+    '''
     API = "/metrics"
     response = requests.get(url=url + API)
     print(response.text)
 
 
 #    通过标签匹配器查找系列
-def prometheus_series(prometheus_rul, expr):
+def prometheus_series(prometheus_url, expr):
     '''
     :return:
     '''
     API = '/api/v1/series?' + " " + expr
-    queryAPI = prometheusQueryApi(prometheus_rul, API)
-    print(queryAPI)
-    response = requests.get(url=prometheus_rul + API)
+    PrometheusUrlApi = prometheusQueryApi(prometheus_url, API)
+    print(PrometheusUrlApi)
+    response = requests.get(url=PrometheusUrlApi)
     print(response.text)
 
 
@@ -62,15 +68,30 @@ def prometheus_query(prometheus_url, expr):
     '''
     metric = 'node_memory_MemTotal_bytes'
     API = "/api/v1/query?query=" + expr
-    response = requests.get(url=prometheus_url + API)
+    PrometheusUrlApi = prometheusQueryApi(prometheus_url, API)
+    response = requests.get(url=PrometheusUrlApi)
     result = response.json()
     print(result)
     if result['status'] == 'success':
         dataset = result['data']['result']
         metric_value = dataset[0]['value']
         total_value = sum(float(value) for value in metric_value)
-        #格式转化 将byte转接为MB
-        print(total_value / len(metric_value) / 1024 / 1024 )
+        # 格式转化 将byte转接为MB
+        print(total_value / len(metric_value) / 1024 / 1024)
+
+
+def queryAllPrometheusMetricValue(prometheus_url, expr):
+    '''
+    一次性获取所有普罗米修斯指标
+    :return:
+    http://60.60.60.191:9090/api/v1/query?query={instance= "60.60.60.151:9101",job='151linux'}
+    '''
+    expr = '{instance= "60.60.60.151:9101",job="151linux"} '
+    API = "/api/v1/query?query=" + expr
+    response = requests.get(url=prometheusQueryApi(prometheus_url, API))
+    if response.json()['status'] == 'success':
+        resultDict = response.json()['data']['result']
+        return resultDict
 
 
 # 查询指标元数据,
@@ -90,7 +111,7 @@ if __name__ == '__main__':
     url = 'http://60.60.60.191:9090'
     # prometheus_metric(url)
     expr = 'node_memory_MemTotal_bytes{instance="60.60.60.151:9101",job="151linux"}'
-    prometheus_query(url, expr)
+    # prometheus_query(url, expr)
     # 通过标签匹配器查找系列
     # curl -g 'http://localhost:9090/api/v1/series?'
     # --data-urlencode 'match[]=up'
@@ -100,3 +121,5 @@ if __name__ == '__main__':
     # prometheus
     # "}'''
     # prometheus_series(url, expr2)
+    # prometheus_metric(url)
+    queryAllPrometheusMetricValue(url, expr=None)
