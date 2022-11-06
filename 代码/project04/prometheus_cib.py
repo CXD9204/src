@@ -52,7 +52,9 @@ def prometheus_series(prometheus_url, expr):
     '''
     :return:
     '''
-    API = '/api/v1/series?' + " " + expr
+    expr = '{instance= "60.60.60.151:9101",job="151linux"}'
+    # API = '/api/v1/series?' + " " + expr
+    API = '/api/v1/series?match[]={instance="60.60.60.191:9090"}'
     PrometheusUrlApi = prometheusQueryApi(prometheus_url, API)
     print(PrometheusUrlApi)
     response = requests.get(url=PrometheusUrlApi)
