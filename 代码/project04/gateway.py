@@ -17,16 +17,15 @@ def middleware():
 
 
 def application(environ, start_response):
-    setup_testing_defaults(environ)
     headers = [('Content-type', 'text/plain')]
-    status = '200 OK'.encode('utf-8')
+    status = '200 OK'
     start_response(status, headers)
-
-    return "HELLO,WORLD"
+    print(environ)
+    return ['HELLO,WORLD'.encode('utf-8')]
 
 
 def main():
-    httpd = make_server('localhost', 8008, app)
+    httpd = make_server('localhost', 8008, application)
     httpd.serve_forever()
 
 

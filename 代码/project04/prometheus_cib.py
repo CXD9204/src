@@ -21,6 +21,7 @@ def prometheusQueryApi(url, API):
     return url + API
 
 
+# 查找服务主机
 def target_url():
     response = requests.get(url=URL + '/api/v1/targets')
     try:
@@ -47,9 +48,10 @@ def prometheus_metric(url):
     print(response.text)
 
 
-#    通过标签匹配器查找系列
-def prometheus_series(prometheus_url, expr):
+# 通过标签匹配器查找系列指标
+def prometheus_series(prometheus_url):
     '''
+    http://60.60.60.191:9090/api/v1/series?match[]={instance="60.60.60.191",job="Linux主机"}
     :return:
     '''
     expr = '{instance= "60.60.60.151:9101",job="151linux"}'
@@ -58,7 +60,9 @@ def prometheus_series(prometheus_url, expr):
     PrometheusUrlApi = prometheusQueryApi(prometheus_url, API)
     print(PrometheusUrlApi)
     response = requests.get(url=PrometheusUrlApi)
-    print(response.text)
+    print(response.json())
+    for data in response.json():
+        print(data)
 
 
 # 普罗米修斯 查询
@@ -94,6 +98,10 @@ def queryAllPrometheusMetricValue(prometheus_url, expr):
     if response.json()['status'] == 'success':
         resultDict = response.json()['data']['result']
         return resultDict
+    elif response.json()['status'] == 'error':
+        print("请求失败查询错误")
+    else:
+        return None
 
 
 # 查询指标元数据,
@@ -122,6 +130,6 @@ if __name__ == '__main__':
     # expr2 = '''--data-urlencode 'match[]=up' --data-urlencode 'match[]=process_start_time_seconds{job="
     # prometheus
     # "}'''
-    # prometheus_series(url, expr2)
+    prometheus_series(url)
     # prometheus_metric(url)
     queryAllPrometheusMetricValue(url, expr=None)

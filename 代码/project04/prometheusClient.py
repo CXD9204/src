@@ -7,8 +7,8 @@
 @Describtion:
 '''
 import win32netcon
-from prometheus_client import Enum, Counter, Summary, Histogram
-from prometheus_client import start_http_server
+from prometheus_client import Enum, Counter, Summary, Histogram,Gauge
+from prometheus_client import start_http_server, CollectorRegistry, push_to_gateway
 import time
 import random
 
@@ -28,14 +28,15 @@ def process_request(t):
     time.sleep(t)
 
 
+def PushToGateway():
+    registry1 = CollectorRegistry()
+    g = Gauge('job_last_success_unixtime', 'Last time a batch job successfully finished', registry=registry1)
+    g.set_to_current_time()
+    push_to_gateway("192.168.177.132:9091", job="151linux", registry=registry1)
+
+
 if __name__ == '__main__':
-    # Start up the server to expose the metrics.
-    start_http_server(8000)
-
-
+    # start_http_server(9090,addr="60.60.60.191")
     while True:
-        process_request(random.random())
-        e.state('running')
-        # e.state("stopped")
-        e.state('running')
-        c.inc()
+        # process_request(random.random())
+        PushToGateway()
