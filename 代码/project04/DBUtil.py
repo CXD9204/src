@@ -52,4 +52,3 @@ if __name__ == '__main__':
         sql = f'insert into prometheus(name,instance,job,value)values("{name}","{instance}","{job}","{value}")'
         cursor.execute(sql)
         mysql.conn.commit()
-        # print(name,instance,job,value)

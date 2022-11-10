@@ -20,7 +20,7 @@ def application(environ, start_response):
     headers = [('Content-type', 'text/plain')]
     status = '200 OK'
     start_response(status, headers)
-    print(environ)
+    print(environ.get('wsgi.multiprocess'))
     return ['HELLO,WORLD'.encode('utf-8')]
 
 

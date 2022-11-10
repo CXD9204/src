@@ -7,6 +7,8 @@
 @Version       :   1.0
 @Describetion  :https://blog.csdn.net/u014305062/article/details/98636139
 '''
+import json
+from pandas import DataFrame
 import requests
 
 URL = 'http://60.60.60.191:9090'
@@ -118,18 +120,20 @@ def prometheus_query_metadata(prometheus_url, metric, limit=None):
 
 
 if __name__ == '__main__':
-    url = 'http://60.60.60.191:9090'
-    # prometheus_metric(url)
-    expr = 'node_memory_MemTotal_bytes{instance="60.60.60.151:9101",job="151linux"}'
-    # prometheus_query(url, expr)
-    # 通过标签匹配器查找系列
-    # curl -g 'http://localhost:9090/api/v1/series?'
-    # --data-urlencode 'match[]=up'
-    # --data-urlencode 'match[]=process_start_time_seconds{job="prometheus"}'
-    # expr2 = " --data-urlencode 'match[]=node_netstat_Tcp_RetransSegs' "
-    # expr2 = '''--data-urlencode 'match[]=up' --data-urlencode 'match[]=process_start_time_seconds{job="
-    # prometheus
-    # "}'''
-    prometheus_series(url)
-    # prometheus_metric(url)
-    queryAllPrometheusMetricValue(url, expr=None)
+    PATH = "F:\DFC\I6000健康管理\配电网工程标准化设计管理系统\\20.46.23.47.txt"
+    dataDict = dict()
+    with open(PATH, 'r+', encoding="utf-8") as f:
+        result = f.readlines()
+        # print(json.loads(result[0]))
+        dataDict = json.loads(result[0])['data']
+    dataList = dataDict['result']
+    metricList=[]
+    valueList=[]
+    for data in dataList:
+        metricList.append(data['metric'])
+        valueList.append(data['value'][1])
+
+    df=DataFrame(metricList)
+    df['value']=valueList
+    df.to_excel('metric.xlsx',index=False,index_label=False)
+

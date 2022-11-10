@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding:UTF-8 -*-
+import json
+
 from neo4j import GraphDatabase
-
-
-# from CommUtil import decrypt
+from CommUtil import decrypt
 
 
 class App:
 
     def __init__(self, uri, user, password):
-        self.user = user
+        self.user = decrypt(user)
         if password:
-            self.pwd = password
+            self.pwd = decrypt(password)
             self.driver = GraphDatabase.driver(uri, auth=(self.user, self.pwd))
         else:
             self.driver = GraphDatabase.driver(uri)
@@ -49,25 +49,24 @@ class App:
         :return:
         '''
         cql = "match(n:指标) where n.指标ID=%s return n.object_type as object_type,n.指标名称 as metric_name" % (indexId)
-        print(cql)
         obj_type = ''
         metric_name = ''
         with self.driver.session() as session:
             result = session.run(cql).data()
-        if result[0]:
+        if result:
             metrics = result[0].get('metric_name')
             obj_type = result[0].get('object_type')
             metric_name = metrics
-        return obj_type, metric_name
+            return obj_type, metric_name
+        else:
+            print("指标结果查询为空,返回结果obj_type=None,metric_name=None")
+            return None, None
 
     def acquire_solution(self, conclusion, metric):
         result = dict()
         indexId = metric.get('indexId')
         obj_type, metric_name = self.get_metric_info(indexId)
-        # cql = "match (n:运维经验) where n.object_type='%s' and n.`指标项`='%s'  return n.tag,n.故障名称,n.value,n.指标描述,n.解决方案,n.方案来源" % (
-        #     obj_type, metric_name)
-        cql = "match (n:运维经验) where n.object_type='%s' and n.`指标项`='%s'  return n" % (
-            obj_type, metric_name)
+        cql = "match (n:运维经验) where n.object_type='%s' and n.`指标项`='%s'  return n" % (obj_type, metric_name)
 
         with self.driver.session() as session:
             dataset = session.run(cql).data()[0]
@@ -93,10 +92,6 @@ class App:
             indexId = metric.get('indexId')
             value = metric.get('value')
             symbol = metric.get('symbol')
-            # 如果标志符号为空,则直接获取运维经验
-            if symbol is None:
-                self.acquire_solution(conclusion, metric)
-                return conclusion
             # 获取对象类型与指标名称
             obj_type, metric_name = self.get_metric_info(indexId)
 
@@ -107,9 +102,21 @@ class App:
             with self.driver.session() as session:
                 result1 = session.run(cql)
                 result1 = result1.peek()
+                # cql执行正确,当没有返回值
                 if result1 is None:
-                    pass
-                    # print("未查询到结果值,请手动执行CQL语句")
+                    result = dict()
+                    cql = "match (n:运维经验) where n.object_type='%s' and n.`指标项`='%s' return n" % (obj_type, metric_name)
+                    with self.driver.session() as session:
+                        if session.run(cql).data():
+                            dataset = session.run(cql).data()[0]
+                            dataDict = dataset.get("n")
+                            result['indexId'] = indexId
+                            result['tag'] = dataDict["tag"]
+                            result['refer'] = dataDict["value"]
+                            result['metric_desc'] = dataDict["指标描述"]
+                            conclusion.append(result)
+
+                # cql执行正确且有返回值
                 else:
                     dataList = result1.values()
                     result['indexId'] = indexId
@@ -173,7 +180,7 @@ class App:
                 print(result_value_list)
 
     # 多指标分析
-    def muti_metrices_analysis2(self, metrices):
+    def metrices_solutions(self, metrices):
         '''
         :param metrices: 多指标列表字典，[{},{},{}]
         :return:
@@ -183,11 +190,12 @@ class App:
               f'return n.tag,n.指标项,n.value,n.故障描述,n.方案来源,n.解决方案'
         with self.driver.session() as session:
             result = session.run(cql)
-            result = result.data()['n']
+            result = result.data()
             if result is None:
-                result1 = session.run(
-                    f'match(n:运维经验)where n.`指标项`={metric["name"]} and {metric.get("value")} {metric.get("symbol")} n.value ' \
-                    f'return n.tag,n.指标项,n.valle,n.故障描述,n.方案来源,n.解决方案').data()['n']
-                msg = f"阈值:{None},采集值:{None},其他参考项:{None} \n"
+                cql = f'match(n:运维经验)where n.`指标项`={metric["name"]} and {metric.get("value")} {metric.get("symbol")} n.value return  n '
+                result1 = session.run(cql).data()['n']
+                msg = {"阈值": result1['value'], "采集值": metric['value'], "其他参考项": None}
             else:
-                msg = f"阈值:{result['value']},采集值:{metric['value']},检测指标:{result['指标项']},解决方案:{result['解决方案']},方案来源:{result['方案来源']}"
+                msg = {"阈值": result['value'], "采集值": metric['value'], "检测指标": result['指标项'], "解决方案": result['解决方案'],
+                       "方案来源": result['方案来源']}
+        return json.dumps(msg)

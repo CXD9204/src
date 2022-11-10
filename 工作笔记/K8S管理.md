@@ -14,6 +14,8 @@
 
 
 
+k8s集群添加节点
+
 kubeadm join 192.168.177.200:6443   --token 28ee89.qm8he23p5gikr7gc --discovery-token-ca-cert-hash sha256:e09541eda66a35dac7d6c9e38697146df1b25b3cb0b092b1041b2c7b857094aa
 
 
