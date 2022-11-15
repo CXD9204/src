@@ -120,7 +120,7 @@ def prometheus_query_metadata(prometheus_url, metric, limit=None):
 
 
 if __name__ == '__main__':
-    PATH = "F:\DFC\I6000健康管理\配电网工程标准化设计管理系统\\20.46.23.47.txt"
+    PATH = "F:\DFC\I6000健康管理\配电网工程标准化设计管理系统\\21.47.38.204.txt"
     dataDict = dict()
     with open(PATH, 'r+', encoding="utf-8") as f:
         result = f.readlines()
