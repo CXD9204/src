@@ -2,9 +2,11 @@
 
 参考文档2:https://linfan1.gitbooks.io/kubernetes-chinese-docs/content/150-kubectl_exec.html
 
-Pod Service Inpress的区别
+LoadBalancer Service Inpress的区别
 
 deployment,Replication Controller 与Replicasets 的区别
+
+
 
 ![image-20221110103917280](C:\Users\admin\AppData\Roaming\Typora\typora-user-images\image-20221110103917280.png)
 

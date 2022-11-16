@@ -2,18 +2,13 @@
 
 参考文档2:https://linfan1.gitbooks.io/kubernetes-chinese-docs/content/150-kubectl_exec.html
 
-#### Service Inpress的区别
+#### LoadBalancer,Service,Inpress的区别
 
-service和pod对象的ip地址才集群内部可达,,但是外部用户无法访问,service就可以看做一组提供相同服务的pod的对外接口
+- service可以看做一组提供相同服务的pod的对外接口,在不暴漏外部服务端口前,仅仅内部可发现service,可以为pod提供负载均衡的能力,但是只能提供4层的负载均衡
 
-- node pod端口上做端口暴露
-- 在工作节点上用公用网络名称空间（hostname）
-- 使用service的nodeport或者loadbalancer
-- ingress七层负载和反向代理资源
+- ingress通过**servicename**标签将集群外部的HTTP和HTTPS路由暴露给集群中的Service容器,可以提供7层的负责对外暴露接口，而且可以调度不同的业务域，不同的url访问路径的业务流量
 
-service为pod提供负载均衡的能力,但是只能提供4层的负载均衡
-
-ingress可以提供7层的负责对外暴露接口，而且可以调度不同的业务域，不同的url访问路径的业务流量
+- loadbalancer暴露服务到外部（Internet）的标准方式,需要云服务厂商提供
 
 #### deployment,Replication Controller 与Replicasets 的区别
 
@@ -31,8 +26,8 @@ ReplicationController 仅适用于具有 restartPolicy 为 Always 的 Pod
 
 #### k8s  port、NodePort、targetPort、containerPort 区别
 
-- port:提供了集群内部客户端访问service的入口
-- NodePort:提供了集群外部客户端访问 Service 的端口
+- port:容器定义的端口
+- NodePort:提供了集群外部客户端访问 Service 的端口,默认使用端口:30000-32767
 - targetPort:pod控制器请定义的应用访问端口,与dockerfile制作容器时暴露的端口一致
 - containerPort:是在pod控制器中定义的、pod中的容器需要暴露的端口
 
