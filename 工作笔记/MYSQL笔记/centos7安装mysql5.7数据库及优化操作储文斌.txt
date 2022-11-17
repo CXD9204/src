@@ -1,0 +1,92 @@
+安装说明：yum方式安装
+
+一、配置阿里云yum源镜像地址
+参考链接：https://www.cnblogs.com/wdjsbk/p/9629931.html (参考该章节：三.配置阿里云yum源 )
+注意：下载后的CentOS-Base.repo内容一定要按照链接里的说明修改，不然镜像速度不起作用。
+
+二、删除centos7自带mysql版本包
+参考链接：https://www.cnblogs.com/finalanddistance/p/10388818.html(方式一)
+1.查看mysql安装
+	rpm -qa|grep -i mysql
+2.卸载查询出的文件(查询出的文件全部删除)
+	rpm -ev --nodeps 文件名
+3.再次执行 rpm-qa|grep -i mysql 会发现已经卸载完成
+
+三、下载安装mysql
+1、cd /home/mysql
+2、下载 mysql57-community-release-el7-8.noarch.rpm 的 YUM 源：
+	wget http://repo.mysql.com/mysql57-community-release-el7-8.noarch.rpm
+3、安装 mysql57-community-release-el7-8.noarch.rpm：
+	rpm -ivh mysql57-community-release-el7-8.noarch.rpm
+4、安装 MySQL，出现提示的话，一路 Y 到底
+	yum install mysql-server
+5、安装完毕后，启动mysql
+	systemctl start mysqld
+6、记住随机的密码
+	cat /var/log/mysqld.log | grep password  
+	出现：A temporary password is generated for root@localhost: hilX0U!9i3_6
+	结尾部分即为密码
+7、登录到 MySQL 服务端并更新用户 root 的密码：
+	mysql -u root -p
+	hilX0U!9i3_6
+	然后更改密码：
+		mysql> alter user 'root'@'localhost' identified by 'Skyt3ch@cy';
+		Query OK, 0 rows affected (0.00 sec)
+		mysql> ALTER USER 'root'@'localhost' PASSWORD EXPIRE NEVER;
+		Query OK, 0 rows affected (0.00 sec)
+8、设置用户 root 可以在任意 IP 下被访问：
+	grant all privileges on *.* to root@"%" identified by "Skyt3ch@Jn#Base";
+9、设置用户 root 可以在本地被访问：
+	grant all privileges on *.* to root@"localhost" identified by "Skyt3ch@cy";
+10、刷新权限使之Am@19920417生效：
+	flush privileges;
+11、设置 MySQL 的字符集为 UTF-8：
+	vim /etc/my.cnf
+	在 [mysqld] 前添加如下代码：
+		[client]
+		default-character-set=utf8
+	在 [mysqld] 后添加如下代码：
+		character_set_server=utf8
+	重启mysql后 再登录，看看字符集，6个utf8就算OK
+		show variables like '%character%';
+12、创建其他数据库：
+	建库建用户：
+		CREATE SCHEMA `新库名` DEFAULT CHARACTER SET utf8;
+		CREATE USER '用户名'@'%' IDENTIFIED BY '用户密码';
+	授权：
+		GRANT ALL PRIVILEGES ON `新库名`.* TO '用户名'@'%';
+13、MySQL控制命令：启动、停止、重启、查看状态
+	service mysqld start
+	service mysqld stop
+	service mysqld restart
+	service mysqld status
+	systemctl start mysqld
+	service mysqld stop
+	service mysqld restart
+	systemctl status mysqld
+14、优化mysql
+  一、创建软连接：
+	(a)确定sellinux服务是否关闭；
+
+​    vim /etc/selinux/config
+
+​    再停止mysql服务；再备份/var/lib/mysql
+​	(b)cp -R /var/lib/mysql /home/mysql
+​	(c)再清空/var/lib/mysql
+​	(d)创建软连接：ln -s /home/mysql /var/lib/mysql
+​	(e)配置mysql用户操作权限：chown -R mysql:mysql /home/mysql
+​			                                         chown -R mysql:mysql /var/lib/mysql
+  二、优化/etc/my.cnf配置：
+​	参考封闭园区106配置
+
+ rpm -e --nodeps mysql-community-libs-5.7.30-1.el7.x86_64
+ rpm -e --nodeps mysql-community-embedded-compat-5.7.30-1.el7.x86_64
+ rpm -e --nodeps mysql-community-embedded-devel-5.7.30-1.el7.x86_64
+ rpm -e --nodeps mysql-community-server-5.7.30-1.el7.x86_64
+ rpm -e --nodeps mysql-community-test-5.7.30-1.el7.x86_64
+ rpm -e --nodeps mysql-community-common-5.7.30-1.el7.x86_64
+ rpm -e --nodeps mysql-community-devel-5.7.30-1.el7.x86_64
+ rpm -e --nodeps mysql-community-libs-compat-5.7.30-1.el7.x86_64
+ rpm -e --nodeps mysql-community-embedded-5.7.30-1.el7.x86_64
+ rpm -e --nodeps mysql-community-client-5.7.30-1.el7.x86_64
+

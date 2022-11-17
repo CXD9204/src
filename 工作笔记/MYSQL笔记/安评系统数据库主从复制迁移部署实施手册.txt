@@ -1,0 +1,468 @@
+# 第一章 环境搭建
+
+## 1 服务器申请
+
+| **服务器名称**                     | **服务器配置**                  | **IP****地址**                                    | **部署路径**     |
+| ---------------------------------- | ------------------------------- | ------------------------------------------------- | ---------------- |
+| 风险防控网格化系统数据库  （主库） | Centos7.4   CPU：16C  内存：32G | 10.196.122.71                                     | 未知             |
+| 安全生产体检中心数据库  （备库）   | Centos7.4   CPU：16C  内存：32G | 未知，需要与10.196.122.71数据库服务器网络双向互通 | /usr/local/mysql |
+
+要求：备库配置要求与主库一致并实现网络双向互通
+
+## 2、小场所自我安评系统数据库备库安装
+
+### 2.1数据库安装包下载：
+
+下载mysql-5.7.30-1.el7.x86_64.rpm-bundle.tar
+
+### 2.2解压数据库tar包
+
+解压文件：
+
+\#tar -xvf mysql-5.7.30-1.el7.x86_64.rpm-bundle.tar
+
+输出文件并安装：
+
+\# rpm -ivh mysql-community-common-5.7.30-1.el7.x86_64.rpm
+
+\# rpm -ivh mysql-community-libs-5.7.30-1.el7.x86_64.rpm
+
+\# rpm -ivh mysql-community-libs-compat-5.7.30-1.el7.x86_64.rpm
+
+\# rpm -ivh mysql-community-client-5.7.30-1.el7.x86_64.rpm
+
+\# rpm -ivh mysql-community-server-5.7.30-1.el7.x86_64.rpm
+
+\# rpm -ivh mysql-community-devel-5.7.30-1.el7.x86_64.rpm
+
+### 2.3修改SELINUX
+
+vim /etc/selinux/config中SELINUX项目=disabled
+
+修改:wq保存，执行setenforce 0  ----使配置生效
+
+重启MYSQL服务systemctl restart mysqld
+
+### 2.4查看MYSQL初始密码
+
+\# grep 'temporary password' /var/log/mysqld.log
+
+至此安装完成。
+
+### 2.5修改密码
+
+\# mysql -uroot -p
+
+mysql> SET PASSWORD = 'IAiebsMZ';
+
+mysql> flush privileges;
+
+\# systemctl restart mysqld
+
+ 
+
+# 第一章 同步配置
+
+## 1、 准备工作-停止应用服务（数据库防火墙端口）
+
+| **服务器名称**                       | **IP****地址**                                               | **                       部署路径**                          |
+| ------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 风险防控网格  化系统数据库（主库）   | 10.196.122.71                                                | **数据库防火墙端口关闭**                                     |
+| 安全生产体检中心数据库  （备库）     | 未知，需要与10.196.122.71数据库服务器网络双向互通            | /usr/local/mysql                                             |
+| 风险防控网格化企业面  NGINX服务器    | 未知                                                         | 未知                                                         |
+| 风险防控网格化企业面  相关应用服务器 | 未知                                                         | 未知                                                         |
+| 风险防控网格化社会面  前端应用服务器 | 10.196.122.47                                                | /home/social_front/front/spp_grid_social  /home/social_front/front/spp_grid_social_pc  /home/social_front/front/spp_grid_social_dev  /home/social_front/front/spp_grid_social_pc_dev |
+| 风险防控网格化社会面  后端应用服务器 | 10.196.122.48  10.196.122.54  10.196.122.55  10.188.43.3  10.188.43.4  10.188.43.5 | /home/social_back/app/mobile  /home/social_back/app/pc  /home/social_back/app_dev/mobile  /home/social_back/app_dev/pc  /social/social_back/app/mobile |
+| 小场所自我安评系统  应用服务器       | 10.196.122.37  10.188.43.1  10.188.43.2  10.188.43.3         | /usr/tomcat/apache-tomcat-8.5.51/webapps/yjmobile  /usr/tomcat/apache-tomcat-8.5.51/webapps/zjadmin |
+
+
+
+## 2、 准备工作-数据同步
+
+主库备份：
+
+mysqldump -uroot -p sppgrid_prod > d:backup1000.sql
+
+建立主备库测试表：
+
+Create table binlog_test(id varchar(100),name varchar(200));
+
+主库→备库：
+
+| 安评业务表                        | 共有迁移表          |
+| --------------------------------- | ------------------- |
+| a_gas_answer                      | yj_nine_small_place |
+| a_gas_question                    | sys_basic_region    |
+| yj_model_group_file               | sys_department      |
+| yj_safety_prod_model              | tj_address_grid     |
+| yj_wgxy_aireply                   | address_grid_rel    |
+| yj_wgxy_code                      | sys_user            |
+| yj_wgxy_dhjl                      | sys_user_role       |
+| yj_wgxy_file                      | sys_role            |
+| yj_wgxy_integral                  | binlog_test         |
+| yj_wgxy_integral_result           |                     |
+| yj_wgxy_jfdh                      |                     |
+| yj_wgxy_questionbank              |                     |
+| yj_wgxy_questionbank_option       |                     |
+| yj_wgxy_questionbank_question     |                     |
+| yj_wgxy_questionbank_question_sub |                     |
+| yj_wgxy_questions_exam            |                     |
+| yj_wgxy_questions_exam_result     |                     |
+| yj_wgxy_small_place               |                     |
+| yj_wgxy_sys_channel               |                     |
+| yj_wgxy_sys_channel_article       |                     |
+| yj_wgxy_sys_home                  |                     |
+| yj_wgxy_user_info                 |                     |
+| yj_wgxy_user_message              |                     |
+| yj_wgxy_user_qa                   |                     |
+| yj_wgxy_work_resume               |                     |
+
+ 
+
+## 3、 数据库参数配置
+
+**主库操作：**
+
+[root~]# vim /etc/my.cnf
+
+\# binlog 文件名称，路径默认和datadir一样的
+
+log-bin=mysql-bin 
+
+注：binlog日志需要至少预留100G
+
+\# 服务Id,保持唯一 
+
+server_id=1
+
+\# 指定mysql的binlog日志记录哪个db
+
+binlog-do-db=sppgrid_prod
+
+\# 保留15天范围内的bin log历史日志
+
+expire_logs_days=15
+
+**从库操作：**
+
+[root~]# vim /etc/my.cnf
+
+\# binlog 文件名称，路径默认和datadir一样的
+
+log-bin= mysql-bin 
+
+注：binlog日志需要至少预留100G
+
+\# 服务Id,保持唯一 
+
+server_id=2
+
+\# 保留15天范围内的bin log历史日志
+
+expire_logs_days=15
+
+\# 指定mysql的binlog日志记录哪个table
+
+replicate-wild-do-table=sppgrid_prod. yj_nine_small_place
+
+replicate-wild-do-table=sppgrid_prod. sys_basic_region
+
+replicate-wild-do-table=sppgrid_prod. address_grid_rel 
+
+replicate-wild-do-table=sppgrid_prod. sys_department
+
+replicate-wild-do-table=sppgrid_prod. tj_address_grid
+
+replicate-wild-do-table=sppgrid_prod. sys_user
+
+replicate-wild-do-table=sppgrid_prod. sys_user_role
+
+replicate-wild-do-table=sppgrid_prod. sys_role
+
+replicate-wild-do-table=sppgrid_prod. binlog_test
+
+\#让MySQL实现不区分大小写
+
+Lower_case_table_names=1
+
+设置完毕后，主库重启mysql服务
+
+[root~]# systemctl restart mysqld
+
+从库重启mysql服务
+
+[root~]# systemctl restart mysqld
+
+## 4、 主库操作
+
+主库操作：
+
+ 
+
+1、创建同步账号：
+
+Mysql>create user ‘my_slave’@’ 10.196.122.XX（从库Ip）’ identified with ‘mysql_native_password’ by ‘pbZYPRvx’; （文档随机密码，正式环境不得使用该密码）
+
+Mysql>flush privileges;
+
+Mysql>grant replication slave on *.* to ‘my_slave’@’ 10.196.122.XX（从库Ip）’;
+
+Mysql>flush privileges;
+
+无法实现指定权限，replication slave 的级别是global，所以不能只作用于某一数据库，而是全局
+
+ 
+
+![img](file:///C:/Users/admin/AppData/Local/Packages/oice_16_974fa576_32c1d314_3261/AC/Temp/msohtmlclip1/01/clip_image002.jpg)
+
+2、删除主库触发器：
+
+drop TRIGGER tri_up_unit_contact ;
+
+ 
+
+3、主库：Mysql>use sppgrid_prod;
+
+Mysql>FLUSH TABLES WITH READ LOCK;   ----锁定用户，后面会解锁
+
+ 
+
+4、查看主服务器状态和同步状态
+
+Mysql>show master status;
+
+![img](file:///C:/Users/admin/AppData/Local/Packages/oice_16_974fa576_32c1d314_3261/AC/Temp/msohtmlclip1/01/clip_image004.jpg)
+
+## 5、 备库操作
+
+mysql -uroot -p
+
+mysql>change master to master_host=’ 10.196.122.71’,
+
+->master_port=3306,
+
+->master_user=’my_slave’,
+
+->master_password=’ pbZYPRvx’, （文档随机密码，正式环境不得使用该密码）
+
+->master_log_file=’binlog.000002’,
+
+->master_log_pos=1929;
+
+![img](file:///C:/Users/admin/AppData/Local/Packages/oice_16_974fa576_32c1d314_3261/AC/Temp/msohtmlclip1/01/clip_image005.png)
+
+开启slave
+
+Mysql>start slave;
+
+![img](file:///C:/Users/admin/AppData/Local/Packages/oice_16_974fa576_32c1d314_3261/AC/Temp/msohtmlclip1/01/clip_image006.png)
+
+备库服务器状态查看：
+
+箭头标注的两个状态一定要是yes
+
+mysql>show slave status\G
+
+![img](file:///C:/Users/admin/AppData/Local/Packages/oice_16_974fa576_32c1d314_3261/AC/Temp/msohtmlclip1/01/clip_image008.jpg)
+
+## 6、 主库解锁
+
+mysql>unlock tables; ----主库解锁
+
+ 
+
+ 
+
+ 
+
+## 7、 主库修改业务表表名
+
+Rename table tablename to newtablename;
+
+**主库操作：修改安评业务表，表名统一加后缀****-****“****-2021****”**
+
+| 安评业务表                    |                                   |
+| ----------------------------- | --------------------------------- |
+| a_gas_answer                  | yj_wgxy_questionbank_question_sub |
+| a_gas_question                | yj_wgxy_questions_exam            |
+| yj_model_group_file           | yj_wgxy_questions_exam_result     |
+| yj_safety_prod_model          | yj_wgxy_small_place               |
+| yj_wgxy_aireply               | yj_wgxy_sys_channel               |
+| yj_wgxy_code                  | yj_wgxy_sys_channel_article       |
+| yj_wgxy_dhjl                  | yj_wgxy_sys_home                  |
+| yj_wgxy_file                  | yj_wgxy_user_info                 |
+| yj_wgxy_integral              | yj_wgxy_user_message              |
+| yj_wgxy_integral_result       | yj_wgxy_user_qa                   |
+| yj_wgxy_jfdh                  | yj_wgxy_work_resume               |
+| yj_wgxy_questionbank          |                                   |
+| yj_wgxy_questionbank_option   |                                   |
+| yj_wgxy_questionbank_question |                                   |
+
+**备库操作：**
+
+新建用户收回迁移表修改、删除权限：
+
+实际环境中，当sppgrid_prod库的权限给用户的时候后，对sppgrid_prod库下某些表进行收回权限不会起到作用。所以建议是：
+
+一、 分库，分成同步库和业务库两个。
+
+二、 操作规范，坚决不在从库里操作同步表。
+
+# 第二章 功能验证
+
+## 1、主备库功能验证
+
+| **验证点**                     | **详细描述**                                                 | **验证状态**                                                 |
+| ------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 表结构同步                     | 修改主库表结构，查看备库同步状态                             |                                                              |
+| 数据验证                       | 在主库对共有表数据进行插入、更新、删除，验证备库同步情况。备库共有表插入、更新、删除。修改不得同步主库（会导致同步失效）。特殊字段:TEXT、DATETIME、Blob、NULL同步情况验证 |                                                              |
+| 主库性能测试                   | （主备库Binlog_test测试表）同步环境下开启BINLOG对主库的影响，指标，值对比 |                                                              |
+| 主库异常情况后  BINLOG结果测试 | 主库异常断连，对从库的影响                                   | 主库异常断连，重启后主库先进行锁表，等待主备库数据一致后，备库重新配对链接，主库解锁 |
+| 小场所自我安评系统应用测试     | 安全生产体检中心，是否能够正常通过手机号进行登录。           |                                                              |
+|                                | 安全生产体检中心相关功能、安全体检、月度体检、我要答题、挑战答题功能是否正常。风险隐患模块内容是否能够正常展示 |                                                              |
+|                                | 单位异常上报后，主库phone_lose是否能够通过接口正常更新并同步至备库，备库业务场所表is_logoff是否正常更新 |                                                              |
+|                                | 安评相关数据产生后，是否只更新了测试版备库业务表，没有更新测试版主库业务表 |                                                              |
+|                                | 重新添加被异常上报的单位是否可以在备库WGXY_SMALL_PLACE表重新拉取一条单位信息 |                                                              |
+| 应急风险防控网格化应用测试     | 网格化统计考核数据安全体检是否能够正常显示                   |                                                              |
+|                                | 单位详情页信用脸谱，已体检的单位数据是否能够正常显示         |                                                              |
+|                                | 单位修改手机号是否主库phone_lose能够从失效状态变为启用       |                                                              |
+|                                | 网格化单位修改单位联系人、单位联系人手机号后，是否能调用接口更新安评场所表单位联系人、单位联系人手机号 |                                                              |
+|                                | 网格化产生的数据主库是否正常同步至备库                       |                                                              |
+
+ 
+
+## 2、测试数据insert操作
+
+执行SQL：
+
+INSER INTO binlog_test (id,name) VALUES(‘1’,’1’);
+
+执行表：binlog_test
+
+执行数量级：1
+
+命令执行库：主库
+
+### 2.1、测试数据状态查看
+
+执行SQL：select * from binlog_test where id=’1’;
+
+执行表：binlog_test
+
+执行数量级：1
+
+命令执行库：从库
+
+### 2.2、测试数据删除
+
+执行SQL：delete from binlog_test where id=’1’;
+
+执行表：binlog_test
+
+执行数量级：1
+
+命令执行库：主库
+
+ 
+
+ 
+
+## 3、测试update操作
+
+执行SQL：
+
+INSER INTO binlog_test (id,name) VALUES(‘1’,’1’);
+
+UPDATE binlog_test SET name=’2’  WHERE id=1;
+
+执行表：binlog_test
+
+执行数量级：1
+
+命令执行库：主库
+
+### 3.1、测试数据状态查看
+
+执行SQL：select * from binlog_test where id=’1’;
+
+执行表：binlog_test
+
+执行数量级：1
+
+命令执行库：从库
+
+## 4、测试alter操作
+
+执行SQL：ALTER TABLE binlog_test ADD age INT NOT NULL COMMENT '测试age';
+
+执行表： binlog_test
+
+执行数量级：1
+
+命令执行库：主库
+
+### 4.1测试删除字段
+
+执行SQL：ALTER TABLE binlog_test DROP age;
+
+执行表：binlog_test
+
+执行数量级：1
+
+命令执行库：主库 
+
+# 第三章 灾备方式
+
+补充内容
+
+人工导出dmp文件。现阶段没考虑灾备，需要调研。
+
+ 
+
+# 第四章 ZABBIX运维监控方式
+
+**人工定时检查**
+
+# 第五章 故障处理方案
+
+一般数据库一方挂掉后，直接重启会自动连接，如果没有连接，进行以下操作。
+
+查看主服务器状态和同步状态
+
+Mysql>show master status;
+
+![img](file:///C:/Users/admin/AppData/Local/Packages/oice_16_974fa576_32c1d314_3261/AC/Temp/msohtmlclip1/01/clip_image009.jpg)
+
+备库操作：
+
+mysql -uroot -p
+
+mysql>change master to master_host=’ 10.196.122.71’,
+
+->master_port=3306,
+
+->master_user=’my_slave’,
+
+->master_password=’ pbZYPRvx’, （文档随机密码，正式环境不得使用该密码）
+
+->master_log_file=’binlog.000002’,
+
+->master_log_pos=1929;
+
+![img](file:///C:/Users/admin/AppData/Local/Packages/oice_16_974fa576_32c1d314_3261/AC/Temp/msohtmlclip1/01/clip_image005.png)
+
+开启slave
+
+Mysql>start slave;
+
+![img](file:///C:/Users/admin/AppData/Local/Packages/oice_16_974fa576_32c1d314_3261/AC/Temp/msohtmlclip1/01/clip_image006.png)
+
+备库服务器状态查看：
+
+箭头标注的两个状态一定要是yes
+
+mysql>show slave status\G
+
+![img](file:///C:/Users/admin/AppData/Local/Packages/oice_16_974fa576_32c1d314_3261/AC/Temp/msohtmlclip1/01/clip_image010.jpg)
+
+至此即可。

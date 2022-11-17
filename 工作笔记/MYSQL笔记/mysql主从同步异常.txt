@@ -1,0 +1,80 @@
+# mysql集群 主从不同步
+
+|             原因             |                             解释                             |                                                              |
+| :--------------------------: | :----------------------------------------------------------: | ------------------------------------------------------------ |
+|           网络延迟           | 通过网络传送binlog文件,网络延迟是主从不同步的绝大多数的原因，特别是跨机房的数据同步出现这种几率非常大，所以做读写分离，注意从业务层进行前期设计。 |                                                              |
+|        主从负载不一致        | 主数据库上面启动1个io线程，而从上面启动1个sql线程和1个io线程，当中任何一台机器的负载很高，忙不过来，导致其中的任何一个线程出现资源不足，都将出现主从不一致的情况。 |                                                              |
+| max_allowed_packet设置不一致 | 数据库上面设置的max_allowed_packet比从数据库大，当一个大的sql语句，能在主数据库上面执行完毕，从数据库上面设置过小，无法执行，导致的主从不一致。 |                                                              |
+|        自增主键不一致        |   key自增键开始的键值跟自增步长设置不一致引起的主从不一致    |                                                              |
+|       同步参数设置问题       | mysql异常宕机情况下，如果sync_binlog和innodb_flush_log_at_trx_commit很有可能出现binlog或者relaylog文件出现损坏，导致主从不一致。 | sync_binlog=1                                 innodb_flush_log_at_trx_commit=1 |
+|          版本不一致          | master高版本,slave 版本过低,主数据库上面支持的功能，从数据库上面不支持该功能。 |                                                              |
+|        主从优化不一致        | 先保证max_allowed_packet，自增键开始点和增长点设置一致;牺牲部分性能在主上面开启sync_binlog | innodb_flush_logs_at_trx_commit = 1                                                       innodb-support_xa = 1                                    innodb_safe_binlog                                                          skip_slave_start                                                                                             read_only |
+|                              |                                                              |                                                              |
+
+## 修复主从不一致
+
+### 方式1:忽略错误后，继续同步
+
+适用于主从数据库相差不大,或者对数据要求可以不完全统一
+
+1、stop slave
+
+2 修改数据库变量：set global sql_slave_skip_counter=1
+
+3、开启主从模式
+
+4、查看从数据库状态：show slave status\G
+
+### 方式2：重做主从，完全同步
+
+适用于数据相差很大，或者对数据统一性要求很高
+
+1 先进入主库，进行锁表防止写入：flush tables with read lock;
+
+2 进行数据库备份：mysqldump -uroot -p -hlocalhost > mysql.bak.sql
+
+3、查看master状态 记录file和position数值
+
+4、把备份文件传到从服务器 scp
+
+5、停止从库状态：stop  slave
+
+6 、从库导入数据：source
+
+7、设置从库同步，设置同步点：
+
+*change master to* 
+
+*master_host = ‘192.168.1.206',* 
+
+*master_user = ‘rsync',* 
+
+*master_port=3306,* 
+
+*master_password=”123456“,* 
+
+*master_log_file = ‘最新的bin_log文件',*
+
+ *master_log_pos=3260;*
+
+8、开启主从同步：start slave
+
+9、查看同步状态：show slave status\G
+
+### 错误类型:
+
+1062错误提示
+
+解决办法:
+
+方式1：change master ……
+
+方式2：stop slave； set global sql_slave-skip_counter=1(跳到下一个bin_log节点)；start slave；show status slave \G;
+
+提示slave和mater有一样的server_id
+
+方式：修改server_id 或者使用replicate_same_server-id
+
+连接mater失败
+
+方式;重新grant replication user 权限
