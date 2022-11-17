@@ -144,9 +144,9 @@ def cib_cmdb_all_metric(url, metric, *target):
         metric_check(result, 'node_procs_running ', metric, ['80150524', "ProcsRunning".lower()])  # 当前运行队列的任务的数目
         metric_check(result, 'node_memory_SwapTotal_bytes', metric, ['80150525', "SwapSize".lower()])  # Swap交换区大小
         metric_check(result, 'node_memory_SwapFree_bytes', metric, ['80150526', "SwapFree".lower()])  # Swap剩余交换区大小
-        metric_check(result, 'node_load1', metric, ['80150527', "CpuLoadAverage1m".lower()]) #cpu1分钟负载
-        metric_check(result, 'node_load5', metric, ['80150528', "CpuLoadAverage5m".lower()]) #cpu1分钟负载
-        metric_check(result, 'node_load15', metric, ['80150529', "CpuLoadAverage15m".lower()]) #cpu1分钟负载
+        metric_check(result, 'node_load1', metric, ['80150527', "CpuLoadAverage1m".lower()]) #cpu 最近1分钟负载
+        metric_check(result, 'node_load5', metric, ['80150528', "CpuLoadAverage5m".lower()]) #cpu 最近5分钟负载
+        metric_check(result, 'node_load15', metric, ['80150529', "CpuLoadAverage15m".lower()]) #cpu 最近15分钟负载
 
         metric_check(result, 'node_memory_MemFree_bytes', metric, ['80150522', "MemFree".lower()])
         metric_check(result, 'node_memory_MemFree_bytes', metric, ['80150522', "MemFree".lower()])
