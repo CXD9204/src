@@ -26,10 +26,11 @@ ReplicationController 仅适用于具有 restartPolicy 为 Always 的 Pod
 
 #### k8s  port、NodePort、targetPort、containerPort 区别
 
-- port:容器定义的端口
+- port:k8s集群内部访问service的端口,通过clusterIP: port可以访问到某个service
 - NodePort:提供了集群外部客户端访问 Service 的端口,默认使用端口:30000-32767
-- targetPort:pod控制器请定义的应用访问端口,与dockerfile制作容器时暴露的端口一致
-- containerPort:是在pod控制器中定义的、pod中的容器需要暴露的端口
+- targetPort:pod容器的端口(与dockerfile文件中暴露的端口一致),port和nodePort上来的流量，经过kube-proxy流入到后端pod的targetPort上
+- containerPort:pod内部容器的端口
+- hostPort:直接将容器的端口与所调度的节点上的端口路由,通过宿主机的IP加上来访问Pod
 
 
 

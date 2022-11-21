@@ -124,7 +124,6 @@ if __name__ == '__main__':
     dataDict = dict()
     with open(PATH, 'r+', encoding="utf-8") as f:
         result = f.readlines()
-        # print(json.loads(result[0]))
         dataDict = json.loads(result[0])['data']
     dataList = dataDict['result']
     metricList=[]

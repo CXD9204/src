@@ -3,6 +3,8 @@
 '''
 @Describetion  :数据公共模块
 '''
+import threading
+
 import pymysql
 import prometheus_cib
 
@@ -38,10 +40,8 @@ def prometheus():
     return result
 
 
-if __name__ == '__main__':
-
-    mysql = MYSQL(host=HOST, port=PORT, user=USER, password=PASSWORD, database=DATABASE)
-    cursor = mysql.cursor
+def AddProtheusmetric(cursor):
+    # cursor=cursor[0]
     for metric in prometheus():
         name = metric['metric']["__name__"]
         instance = metric['metric']["instance"]
@@ -52,3 +52,15 @@ if __name__ == '__main__':
         sql = f'insert into prometheus(name,instance,job,value)values("{name}","{instance}","{job}","{value}")'
         cursor.execute(sql)
         mysql.conn.commit()
+
+
+if __name__ == '__main__':
+    mysql = MYSQL(host=HOST, port=PORT, user=USER, password=PASSWORD, database=DATABASE)
+    cursor = mysql.cursor
+    thread = []
+    threadLock = threading.Lock()
+    t = threading.Thread(target=AddProtheusmetric, args=(cursor,))
+    threadLock.acquire()  # 线程加锁
+    t.start()
+    threadLock.release()  # 线程锁释放
+    print(t.isAlive())

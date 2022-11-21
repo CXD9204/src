@@ -110,7 +110,7 @@ def cib_cmdb_by_metric(metric_name):
 
     resultList = ResponseData(response)
     for result in resultList:
-        metric_check(result,)
+        metric_check(result, )
 
 
 # cmdb指标采集整理
@@ -138,15 +138,16 @@ def cib_cmdb_all_metric(url, metric, *target):
         metric_check(result, 'node_memory_MemTotal_bytes', metric, ['80150513', "MemSize".lower()])  # 内存大小
         metric_check(result, 'node_memory_MemAvailable_bytes', metric, ['80150521', "MemAvailable".lower()])  # 可用内存大小
         metric_check(result, 'node_memory_MemFree_bytes', metric, ['80150522', "MemFree".lower()])  # 剩余内存大小
-        metric_check(result, 'node_disk_written_bytes_total', metric,['801505010', "FileSystemUsedRatio".lower()])  # 磁盘写入字节数
+        metric_check(result, 'node_disk_written_bytes_total', metric,
+                     ['801505010', "FileSystemUsedRatio".lower()])  # 磁盘写入字节数
         metric_check(result, 'node_network_carrier', metric, ['80150509', "NetTotalRate".lower()])  # 网络负载
         metric_check(result, 'node_procs_blocked', metric, ['80150523', "ProcsBlocked".lower()])  # 当前被阻塞的任务的数目
         metric_check(result, 'node_procs_running ', metric, ['80150524', "ProcsRunning".lower()])  # 当前运行队列的任务的数目
         metric_check(result, 'node_memory_SwapTotal_bytes', metric, ['80150525', "SwapSize".lower()])  # Swap交换区大小
         metric_check(result, 'node_memory_SwapFree_bytes', metric, ['80150526', "SwapFree".lower()])  # Swap剩余交换区大小
-        metric_check(result, 'node_load1', metric, ['80150527', "CpuLoadAverage1m".lower()]) #cpu 最近1分钟负载
-        metric_check(result, 'node_load5', metric, ['80150528', "CpuLoadAverage5m".lower()]) #cpu 最近5分钟负载
-        metric_check(result, 'node_load15', metric, ['80150529', "CpuLoadAverage15m".lower()]) #cpu 最近15分钟负载
+        metric_check(result, 'node_load1', metric, ['80150527', "CpuLoadAverage1m".lower()])  # cpu 最近1分钟负载
+        metric_check(result, 'node_load5', metric, ['80150528', "CpuLoadAverage5m".lower()])  # cpu 最近5分钟负载
+        metric_check(result, 'node_load15', metric, ['80150529', "CpuLoadAverage15m".lower()])  # cpu 最近15分钟负载
 
         metric_check(result, 'node_memory_MemFree_bytes', metric, ['80150522', "MemFree".lower()])
         metric_check(result, 'node_memory_MemFree_bytes', metric, ['80150522', "MemFree".lower()])
