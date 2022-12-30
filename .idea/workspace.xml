@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="ff0fd284-9575-4ef0-8a42-b43e937432f6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/代码/it-health-knowl-script" beforeDir="false" afterPath="$PROJECT_DIR$/代码/it-health-knowl-script" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/代码/it-health-knowl-script.7z" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/代码/it-health-knowl-script/check/deploy_check_nginx_mem_size.py" beforeDir="false" afterPath="$PROJECT_DIR$/代码/it-health-knowl-script/check/deploy_check_nginx_mem_size.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/代码/it-health-knowl-script/check/deploy_check_nginx_runtime_env.py" beforeDir="false" afterPath="$PROJECT_DIR$/代码/it-health-knowl-script/check/deploy_check_nginx_runtime_env.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/代码/it-health-knowl-script/check/deploy_check_tomcat_config_acceptCount.py" beforeDir="false" afterPath="$PROJECT_DIR$/代码/it-health-knowl-script/check/deploy_check_tomcat_config_acceptCount.py" afterDir="false" />
