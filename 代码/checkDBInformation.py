@@ -101,7 +101,7 @@ def max_physical_IO_sql(conn) -> "表物理IO最多的":
 
 
 def max_logical_read_sql(conn) -> '表逻辑读最多':
-    sql = '''SELECT 	object_schema, 	object_name, COUNT_READ, COUNT_WRITE, COUNT_FETCH, SUM_TIMER_WAIT  FROM `performance_schema`.table_io_waits_summary_by_table  ORDER BY 	sum_timer_wait DESC;'''
+    sql = '''SELECT object_schema, 	object_name, COUNT_READ, COUNT_WRITE, COUNT_FETCH, SUM_TIMER_WAIT  FROM `performance_schema`.table_io_waits_summary_by_table  ORDER BY 	sum_timer_wait DESC;'''
     return get_mysql_exec_results(conn, sql)
 
 

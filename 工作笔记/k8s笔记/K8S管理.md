@@ -426,7 +426,19 @@ vim /etc/kubernetes/apiserver KUBE_ADMISSION_CONTROL="--admission_control=Namesp
 
 按顺序启动以下服务：
 
-systemctl start etcd systemctl start docker systemctl start kube-apiserver.service systemctl start kube-controller-manager.service systemctl start kube-scheduler.service systemctl start kubelet.service systemctl start kube-proxy.service
+systemctl start etcd 
+
+systemctl start docker 
+
+systemctl start kube-apiserver.service 
+
+systemctl start kube-controller-manager.service 
+
+systemctl start kube-scheduler.service 
+
+systemctl start kubelet.service 
+
+systemctl start kube-proxy.service
 
 ### 集群搭建（k8s 1.15版本）
 

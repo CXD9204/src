@@ -219,7 +219,7 @@ PARTITION published values in (2)	-- 已发布的放在一个分区
 | 参数                            | 参数值                | 备注                                                         |
 | ------------------------------- | --------------------- | ------------------------------------------------------------ |
 | innodb_buffer_pool_size         | 物理内存80%左右       | 纯数据库服务器，可以通过调整命中率来优化，值为innodb_buffer_pool_chunk_size* innodb_buffer_pool_instances的倍数 |
-| innodb_buffer_pool_instances    | 数据库实例            | 该值更改 会影响innodb_buffer_pool_size的大小，最大值：64     |
+| innodb_buffer_pool_instances    | 数据库实例            | 将缓冲池划分为多个单独的实例可以提高并发性,该值更改 会影响innodb_buffer_pool_size的大小，最大值：64 |
 | innodb_buffer_pool_chunk_size   | 128M                  | 该值更改 会影响innodb_buffer_pool_size的大小                 |
 | innodb_additional_men_pool_size | 100M（32G物理内存）   | 默认值                                                       |
 | innodb_log_buffer_size          | 不超过32M             | 默认值8M，日志写入磁盘前的缓存大小                           |
@@ -257,7 +257,7 @@ show variables like "%xxxx%"
 
 ### 查看进程状态
 
-show full processlist;
+show full processlist
 
 | state值                        | 行为分析                                                     | 影响                                                         |
 | ------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -307,6 +307,12 @@ SHOW PROFILES
 
 #查看指定sql性能分析，根据query_id查询
 		show PROFILE ALL FOR QUERY 183 limit 10
+
+### 数据库缓存池实例
+
+innodb_buffer_pool_instances通过减少争用不同线程对缓存页面进行读写的争用,将缓冲池划分为多个单独的实例可以提高并发性
+
+在Linux系统中,数据库 [innodb_buffer_pool_size](https://blog.csdn.net/SunZLong/article/details/innodb-storage-engine.html#sysvar_innodb_buffer_pool_size) 大于等于1G是innodb_buffer_pool_instances=8,否则为1,该值最大值为64
 
 ### 数据库高可用方案
 

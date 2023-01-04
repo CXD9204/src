@@ -1,0 +1,19 @@
+## Nginx服务操作
+
+### nginx服务注册为启动服务
+
+nginx  service.exe   install
+
+## nginx常用的基本命令
+
+start nginx.exe       ## 启动服务
+
+nginx.exe -s stop	  ## 快速停止服务
+
+nginx.exe -s quit	  ## 优雅的 停止服务
+
+nginx.exe -s reload	  ## 重新加载 配置文件，这命令可以不用停止nginx
+
+nginx.exe -s reopen	  ## 重新打开日志文件
+
+## redis服务操作
